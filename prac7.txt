@@ -1,0 +1,262 @@
+Prac 7
+pr 7 jar files required
+spring-core-5.x.x.RELEASE.jar
+spring-context-5.x.x.RELEASE.jar
+spring-beans-5.x.x.RELEASE.jar
+spring-expression-5.x.x.RELEASE.jar
+spring-aop-5.x.x.RELEASE.jar
+spring-jcl-5.x.x.RELEASE.jar
+
+Step 1: Create Java Project
+Open Eclipse
+File → New → Java Project -> Finish
+
+Step 2: Create Package
+Right-click src
+New → Package
+Package name: com.example
+
+Step 3: Add Spring JAR Files
+Right-click project
+Build Path → Configure Build Path
+Go to Libraries (Classpath)
+Click Add External JARs
+Select all Spring JAR files
+Apply → Close
+
+Step 4: Create XML Configuration Files
+Right-click src
+New → File
+Create: applicationContext.xml
+
+com.example mein java files and src me applicationContent.xml file
+Note: delete module-info.java
+
+1) Write a program to print “Hello World” using spring framework.
+HelloWorld.java
+package com.example;
+public class HelloWorld {
+    private String message;
+    public void setMessage(String message) {
+        this.message = message;
+    }
+    public void printMessage() {
+        System.out.println(message);
+    }
+}
+
+MainApp.java
+
+package com.example;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+public class MainApp {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext("applicationContext.xml");
+
+        HelloWorld obj = (HelloWorld) context.getBean("helloBean");
+        obj.printMessage();
+    }
+}
+
+applicationContext.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="helloBean" class="com.example.HelloWorld">
+        <property name="message" value="Hello World from username" />
+    </bean>
+</beans>
+
+2) Write a program to demonstrate dependency injection via setter method
+MessageService.java
+package com.example;
+
+public class MessageService {
+    public String getMessage() {
+        return "Hello from MessageService!  (Username)";
+    }
+}
+
+MessagePrinter.java 
+package com.example;
+public class MessagePrinter {
+    private MessageService messageService;
+    public void setMessageService(MessageService messageService) {
+        this.messageService = messageService;
+    }
+
+    public void printMessage() {
+        System.out.println(messageService.getMessage());
+    }
+}
+
+applicationContent.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="messageService" class="com.example.MessageService" />
+
+    <bean id="messagePrinter" class="com.example.MessagePrinter">
+        <property name="messageService" ref="messageService" />
+    </bean>
+
+</beans>
+
+MainApp1.java 
+package com.example;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class MainApp1 {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext("applicationContext.xml");
+
+        MessagePrinter printer =
+                (MessagePrinter) context.getBean("messagePrinter");
+
+        printer.printMessage();
+    }
+}
+
+3) Write a program to demonstrate dependency injection via Constructor.
+ConstructorMessageService.java
+
+package com.example;
+public class ConstructorMessageService {
+    
+public String getMessage() {
+        return "Hello from Constructor Injection! (Username)";
+    }
+}
+
+
+
+
+ConstructorMessagePrinter.java
+package com.example;
+
+public class ConstructorMessagePrinter {
+    private ConstructorMessageService messageService;
+    // Constructor Injection
+    public ConstructorMessagePrinter(ConstructorMessageService messageService) {
+        this.messageService = messageService;
+    }
+    
+    public void printMessage() {
+        System.out.println(messageService.getMessage());
+    }
+}
+
+constructorInjection.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd">
+    
+    <bean id="messageService" class="com.example.ConstructorMessageService" />
+    <bean id="messagePrinter" class="com.example.ConstructorMessagePrinter">
+        <constructor-arg ref="messageService" />
+    </bean>
+
+</beans>
+
+TestConstructorInjection.java
+package com.example;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class TestConstructorInjection {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext("constructorInjection.xml");
+        ConstructorMessagePrinter printer =
+                (ConstructorMessagePrinter) context.getBean("messagePrinter");
+        printer.printMessage();  
+    }
+}
+
+
+
+4) Write a program to demonstrate Autowiring.
+MessageServiceW.java
+package com.example;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class MessageServiceW {
+    public String getMessage() {
+        return "Hello from MessageService (Autowiring)! (Username)";
+    }
+}
+
+MessagePrinterW.java
+package com.example;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MessagePrinterW {
+
+    @Autowired
+    private MessageServiceW messageService;
+
+    public void printMessage() {
+        System.out.println(messageService.getMessage());
+    }
+}
+
+applicationContextW.java
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.example"/>
+
+</beans>
+
+
+
+
+MainAppW.java
+package com.example;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class MainAppW {
+    public static void main(String[] args) {
+
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext("applicationContextW.xml");
+
+        MessagePrinterW printer = context.getBean(MessagePrinterW.class);
+        printer.printMessage();
+    }
+}
+
